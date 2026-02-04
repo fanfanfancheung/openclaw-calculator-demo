@@ -12,6 +12,7 @@ class Calculator:
     
     def __init__(self):
         self.result = 0
+        self.history = []  # 新增：计算历史记录
         self.operations = {
             '+': self.add,
             '-': self.subtract,
@@ -44,9 +45,14 @@ class Calculator:
                 if num2 is None:
                     # 连续计算模式，使用当前结果作为第一个数
                     result = self.operations[operation](self.result, num1)
+                    calculation = f"{self.result} {operation} {num1} = {result}"
                 else:
                     # 新计算
                     result = self.operations[operation](num1, num2)
+                    calculation = f"{num1} {operation} {num2} = {result}"
+                
+                # 记录到历史
+                self.history.append(calculation)
                 self.result = result
                 return result
             else:
@@ -58,10 +64,30 @@ class Calculator:
     def reset(self):
         """重置计算器"""
         self.result = 0
+        self.history = []  # 同时清空历史记录
     
     def get_result(self):
         """获取当前结果"""
         return self.result
+    
+    def get_history(self):
+        """获取计算历史"""
+        return self.history
+    
+    def show_history(self):
+        """显示计算历史"""
+        if not self.history:
+            print("📝 暂无计算历史")
+            return
+        
+        print("\n📝 计算历史：")
+        print("-" * 30)
+        for i, calc in enumerate(self.history[-10:], 1):  # 只显示最近10次
+            print(f"{i:2d}. {calc}")
+        
+        if len(self.history) > 10:
+            print(f"... (共 {len(self.history)} 次计算)")
+        print("-" * 30)
 
 
 def print_menu():
@@ -72,8 +98,9 @@ def print_menu():
     print("操作说明：")
     print("1. 输入：数字1 运算符 数字2  (例：5 + 3)")
     print("2. 连续计算：运算符 数字     (例：* 2)")
-    print("3. 输入 'reset' 重置结果")
-    print("4. 输入 'quit' 或 'q' 退出")
+    print("3. 输入 'history' 查看计算历史")
+    print("4. 输入 'reset' 重置结果")
+    print("5. 输入 'quit' 或 'q' 退出")
     print("="*40)
 
 
@@ -86,6 +113,9 @@ def parse_input(user_input):
     
     if user_input == 'reset':
         return 'reset', None, None, None
+    
+    if user_input == 'history':
+        return 'history', None, None, None
     
     # 分割输入
     parts = user_input.split()
@@ -137,6 +167,9 @@ def main():
         elif action == 'reset':
             calculator.reset()
             print("✅ 计算器已重置")
+        
+        elif action == 'history':
+            calculator.show_history()
         
         elif action == 'error':
             print("❌ 输入格式错误！请参考操作说明")
